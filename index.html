@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Universal Real Solar System</title>
+
+    <!-- THREE.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+    <!-- THREE.JS ORBIT CONTROLS -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SPACE BACKGROUND
+    ====================================================== -->
+
+    <div id="space-ui">
+
+        <div class="top-title">
+            <div class="main-title">
+                UNIVERSAL
+            </div>
+
+            <div class="sub-title">
+                REAL SOLAR SYSTEM
+            </div>
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="system-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                SOLAR SYSTEM ONLINE
+            </span>
+
+        </div>
+
+
+        <!-- PLANET INFORMATION -->
+
+        <div id="planet-info">
+
+            <div class="info-title">
+                SOLAR SYSTEM
+            </div>
+
+            <div class="info-line">
+                Select a planet
+            </div>
+
+            <div class="info-line">
+                3D orbital simulation
+            </div>
+
+        </div>
+
+
+        <!-- CAMERA CONTROLS -->
+
+        <div class="bottom-controls">
+
+            <button id="resetCamera">
+                RESET VIEW
+            </button>
+
+            <button id="toggleOrbits">
+                ORBITS
+            </button>
+
+            <button id="toggleLabels">
+                LABELS
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         3D SOLAR SYSTEM
+    ====================================================== -->
+
+    <div id="solar-system"></div>
+
+
+    <!-- MAIN SCRIPT -->
+
+    <script src="script.js"></script>
+
+</body>
+</html>
