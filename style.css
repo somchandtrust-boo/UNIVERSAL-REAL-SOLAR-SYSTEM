@@ -1,6 +1,6 @@
 /* =========================================================
    UNIVERSAL REAL SOLAR SYSTEM
-   PREMIUM SPACE UI
+   PART 6 — PREMIUM SPACE HUD
    ========================================================= */
 
 * {
@@ -14,135 +14,183 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+
     background: #000;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #fff;
+
+    color: #ffffff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
+
 /* =========================================================
-   MAIN 3D AREA
+   3D SYSTEM
    ========================================================= */
 
 #solar-system {
+
     position: fixed;
+
     inset: 0;
+
     width: 100%;
     height: 100%;
+
+    z-index: 1;
+
     background:
         radial-gradient(
             circle at center,
-            rgba(15, 25, 55, 0.35),
-            #000 65%
+            #07101c 0%,
+            #02050a 45%,
+            #000000 100%
         );
-    z-index: 1;
 }
 
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
 
 /* =========================================================
-   UI LAYER
+   HUD
    ========================================================= */
 
-#space-ui {
+.hud {
+
     position: fixed;
+
     inset: 0;
+
     z-index: 10;
+
     pointer-events: none;
 }
 
+
 /* =========================================================
-   TOP TITLE
+   BRAND
    ========================================================= */
 
-.top-title {
+.brand {
+
     position: absolute;
+
     top: 24px;
     left: 28px;
 
     padding: 14px 20px;
 
-    background: rgba(0, 0, 0, 0.35);
+    min-width: 220px;
 
-    border-left: 2px solid rgba(0, 200, 255, 0.9);
+    background:
+        rgba(0, 8, 18, 0.62);
+
+    border-left:
+        3px solid #00d9ff;
+
+    border-top:
+        1px solid rgba(0, 210, 255, 0.25);
+
+    border-right:
+        1px solid rgba(0, 210, 255, 0.12);
+
+    border-bottom:
+        1px solid rgba(0, 210, 255, 0.12);
+
+    backdrop-filter:
+        blur(12px);
 
     box-shadow:
-        0 0 20px rgba(0, 180, 255, 0.12),
-        inset 0 0 20px rgba(0, 150, 255, 0.04);
-
-    backdrop-filter: blur(8px);
+        0 0 25px
+        rgba(0, 190, 255, 0.08);
 }
 
-.main-title {
+
+.brand-main {
+
     font-size: 25px;
+
     font-weight: 800;
+
     letter-spacing: 6px;
 
-    color: #ffffff;
+    line-height: 1;
 
     text-shadow:
-        0 0 10px rgba(0, 200, 255, 0.8),
-        0 0 25px rgba(0, 150, 255, 0.35);
+        0 0 10px
+        rgba(0, 210, 255, 0.7);
 }
 
-.sub-title {
-    margin-top: 5px;
 
-    font-size: 11px;
-    letter-spacing: 4px;
+.brand-sub {
+
+    margin-top: 7px;
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
 
     color: #00d9ff;
 }
 
+
 /* =========================================================
-   SYSTEM STATUS
+   LIVE STATUS
    ========================================================= */
 
-.system-status {
+.live-status {
+
     position: absolute;
 
-    top: 30px;
-    right: 30px;
+    top: 25px;
+    right: 28px;
 
     display: flex;
+
     align-items: center;
-    gap: 9px;
 
-    padding: 10px 16px;
+    gap: 10px;
 
-    border: 1px solid rgba(0, 220, 255, 0.35);
+    padding:
+        10px 15px;
 
-    background: rgba(0, 10, 20, 0.5);
+    background:
+        rgba(0, 8, 18, 0.65);
 
-    backdrop-filter: blur(8px);
+    border:
+        1px solid
+        rgba(0, 210, 255, 0.32);
 
-    font-size: 11px;
+    backdrop-filter:
+        blur(10px);
+
+    font-size: 10px;
+
     letter-spacing: 2px;
 
-    color: #9defff;
+    color: #a7f1ff;
 }
 
-/* blinking green/blue indicator */
 
-.status-dot {
+.status-light {
+
     width: 8px;
     height: 8px;
 
     border-radius: 50%;
 
-    background: #00ffb7;
+    background: #00ff9d;
 
     box-shadow:
-        0 0 7px #00ffb7,
-        0 0 15px rgba(0, 255, 183, 0.8);
+        0 0 7px #00ff9d,
+        0 0 18px rgba(0, 255, 157, 0.7);
 
-    animation: statusBlink 1.5s infinite;
+    animation:
+        statusPulse 1.4s infinite;
 }
 
-@keyframes statusBlink {
+
+@keyframes statusPulse {
 
     0%,
     100% {
@@ -154,119 +202,399 @@ canvas {
     }
 }
 
+
 /* =========================================================
-   PLANET INFORMATION PANEL
+   PLANET INFO
    ========================================================= */
 
-#planet-info {
+.planet-info {
+
     position: absolute;
 
     left: 28px;
-    bottom: 100px;
 
-    width: 260px;
+    bottom: 105px;
 
-    padding: 17px;
+    width: 285px;
 
-    background: rgba(0, 8, 18, 0.62);
+    min-height: 125px;
 
-    border: 1px solid rgba(0, 190, 255, 0.35);
+    padding: 18px;
 
-    border-left: 3px solid #00cfff;
+    background:
+        rgba(0, 8, 18, 0.70);
 
-    backdrop-filter: blur(10px);
+    border-left:
+        3px solid #00d9ff;
+
+    border-top:
+        1px solid rgba(0, 210, 255, 0.24);
+
+    border-right:
+        1px solid rgba(0, 210, 255, 0.12);
+
+    border-bottom:
+        1px solid rgba(0, 210, 255, 0.12);
+
+    backdrop-filter:
+        blur(14px);
 
     box-shadow:
-        0 0 25px rgba(0, 180, 255, 0.08),
-        inset 0 0 20px rgba(0, 150, 255, 0.03);
+        0 0 30px
+        rgba(0, 180, 255, 0.07);
+
+    transition:
+        0.25s ease;
 }
 
-.info-title {
-    margin-bottom: 10px;
 
-    font-size: 14px;
-    font-weight: bold;
+.info-title {
+
+    font-size: 16px;
+
+    font-weight: 700;
 
     letter-spacing: 3px;
 
-    color: #00d9ff;
+    color: #00ddff;
+
+    margin-bottom: 12px;
 }
 
-.info-line {
-    margin-top: 6px;
+
+.info-text {
 
     font-size: 11px;
 
-    letter-spacing: 1px;
+    line-height: 1.7;
 
-    color: rgba(255, 255, 255, 0.72);
+    color:
+        rgba(255, 255, 255, 0.72);
 }
 
+
 /* =========================================================
-   BOTTOM BUTTONS
+   DATA STATUS
    ========================================================= */
 
-.bottom-controls {
+.data-status {
+
+    position: absolute;
+
+    right: 28px;
+
+    bottom: 105px;
+
+    width: 225px;
+
+    padding: 15px;
+
+    background:
+        rgba(0, 8, 18, 0.65);
+
+    border:
+        1px solid
+        rgba(0, 210, 255, 0.22);
+
+    backdrop-filter:
+        blur(12px);
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    color:
+        rgba(255, 255, 255, 0.5);
+}
+
+
+.data-status strong {
+
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: 11px;
+
+    color: #d8faff;
+
+    letter-spacing: 1px;
+}
+
+
+.data-status small {
+
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+
+    color: #00cfff;
+}
+
+
+/* =========================================================
+   BOTTOM CONTROLS
+   ========================================================= */
+
+.controls {
+
     position: absolute;
 
     left: 50%;
+
     bottom: 25px;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     display: flex;
-    gap: 10px;
+
+    gap: 8px;
 
     pointer-events: auto;
 }
 
-.bottom-controls button {
+
+.controls button {
+
     min-width: 105px;
 
-    padding: 10px 15px;
+    height: 38px;
 
-    border: 1px solid rgba(0, 210, 255, 0.5);
+    padding:
+        0 15px;
+
+    border:
+        1px solid
+        rgba(0, 210, 255, 0.40);
+
+    outline: none;
 
     background:
         linear-gradient(
             180deg,
-            rgba(0, 80, 120, 0.35),
-            rgba(0, 20, 40, 0.65)
+            rgba(0, 70, 100, 0.35),
+            rgba(0, 12, 24, 0.80)
         );
 
-    color: #dffaff;
+    color: #d9faff;
 
-    font-size: 10px;
-    font-weight: bold;
+    font-size: 9px;
+
+    font-weight: 700;
 
     letter-spacing: 2px;
 
     cursor: pointer;
 
-    backdrop-filter: blur(8px);
+    backdrop-filter:
+        blur(10px);
 
     transition:
-        0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
+        0.2s ease;
 }
 
-.bottom-controls button:hover {
+
+.controls button:hover {
 
     color: #ffffff;
 
-    border-color: #00eaff;
+    border-color:
+        #00eaff;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0, 110, 150, 0.40),
+            rgba(0, 20, 35, 0.85)
+        );
 
     box-shadow:
-        0 0 12px rgba(0, 220, 255, 0.45),
-        inset 0 0 12px rgba(0, 200, 255, 0.12);
+        0 0 15px
+        rgba(0, 220, 255, 0.22);
 
-    transform: translateY(-2px);
+    transform:
+        translateY(-2px);
 }
 
-.bottom-controls button:active {
-    transform: translateY(0);
+
+.controls button:active {
+
+    transform:
+        translateY(0);
 }
+
+
+/* =========================================================
+   LOADING SCREEN
+   ========================================================= */
+
+.loading {
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    width: 330px;
+
+    padding: 25px;
+
+    text-align: center;
+
+    background:
+        rgba(0, 5, 12, 0.82);
+
+    border:
+        1px solid
+        rgba(0, 210, 255, 0.30);
+
+    backdrop-filter:
+        blur(15px);
+
+    box-shadow:
+        0 0 40px
+        rgba(0, 180, 255, 0.08);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.5s ease;
+}
+
+
+.loading-title {
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 3px;
+
+    color: #dffaff;
+}
+
+
+.loading-bar {
+
+    width: 100%;
+
+    height: 3px;
+
+    margin-top: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    overflow: hidden;
+}
+
+
+.loading-bar span {
+
+    display: block;
+
+    width: 35%;
+
+    height: 100%;
+
+    background: #00d9ff;
+
+    box-shadow:
+        0 0 12px
+        rgba(0, 217, 255, 0.8);
+
+    animation:
+        loadingMove 1.2s infinite;
+}
+
+
+@keyframes loadingMove {
+
+    0% {
+        transform: translateX(-120%);
+    }
+
+    100% {
+        transform: translateX(350%);
+    }
+}
+
+
+.loading-text {
+
+    margin-top: 12px;
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+
+    color:
+        rgba(255, 255, 255, 0.45);
+}
+
+
+/* =========================================================
+   SCAN LINES
+   ========================================================= */
+
+.hud::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.012) 0px,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px,
+            transparent 4px
+        );
+
+    opacity: 0.22;
+}
+
+
+/* =========================================================
+   CORNER HUD MARKERS
+   ========================================================= */
+
+.hud::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 18px;
+    top: 18px;
+
+    width: 55px;
+    height: 55px;
+
+    border-left:
+        1px solid
+        rgba(0, 220, 255, 0.35);
+
+    border-top:
+        1px solid
+        rgba(0, 220, 255, 0.35);
+
+    pointer-events: none;
+}
+
 
 /* =========================================================
    MOBILE
@@ -274,69 +602,120 @@ canvas {
 
 @media (max-width: 700px) {
 
-    .top-title {
-        top: 15px;
-        left: 15px;
+    .brand {
 
-        padding: 10px 13px;
+        top: 14px;
+        left: 14px;
+
+        min-width: 180px;
+
+        padding:
+            11px 14px;
     }
 
-    .main-title {
+
+    .brand-main {
+
         font-size: 18px;
+
         letter-spacing: 4px;
     }
 
-    .sub-title {
+
+    .brand-sub {
+
         font-size: 8px;
+
         letter-spacing: 2px;
     }
 
-    .system-status {
-        top: 15px;
-        right: 15px;
 
-        padding: 8px 10px;
+    .live-status {
+
+        top: 62px;
+        right: 14px;
+
+        padding:
+            8px 10px;
 
         font-size: 8px;
-        letter-spacing: 1px;
     }
 
-    #planet-info {
-        left: 15px;
-        bottom: 82px;
+
+    .planet-info {
+
+        left: 14px;
+
+        bottom: 75px;
 
         width: 210px;
 
-        padding: 12px;
+        min-height: 100px;
+
+        padding: 13px;
     }
+
 
     .info-title {
-        font-size: 11px;
+
+        font-size: 12px;
+
+        margin-bottom: 7px;
     }
 
-    .info-line {
+
+    .info-text {
+
         font-size: 9px;
     }
 
-    .bottom-controls {
-        bottom: 15px;
 
-        width: calc(100% - 30px);
+    .data-status {
 
-        justify-content: center;
+        display: none;
     }
 
-    .bottom-controls button {
+
+    .controls {
+
+        width:
+            calc(100% - 28px);
+
+        bottom: 14px;
+
+        gap: 5px;
+    }
+
+
+    .controls button {
+
         min-width: 0;
 
         flex: 1;
 
-        padding: 9px 5px;
+        height: 36px;
+
+        padding:
+            0 5px;
 
         font-size: 8px;
+
         letter-spacing: 1px;
     }
+
+
+    .loading {
+
+        width:
+            calc(100% - 50px);
+
+        max-width: 330px;
+
+        padding: 20px;
+    }
+
 }
+
 
 /* =========================================================
    SMALL MOBILE
@@ -344,29 +723,39 @@ canvas {
 
 @media (max-width: 430px) {
 
-    .system-status {
-        top: 65px;
-        right: 15px;
+    .planet-info {
+
+        width: 185px;
+
+        bottom: 70px;
     }
 
-    #planet-info {
-        bottom: 75px;
-        width: 190px;
+
+    .live-status {
+
+        font-size: 7px;
     }
 
-    .bottom-controls {
-        gap: 5px;
+
+    .controls button {
+
+        font-size: 7px;
     }
+
 }
 
+
 /* =========================================================
-   TOUCH DEVICE
+   TOUCH DEVICES
    ========================================================= */
 
 @media (hover: none) {
 
-    .bottom-controls button:hover {
+    .controls button:hover {
+
         transform: none;
+
         box-shadow: none;
     }
+
 }
