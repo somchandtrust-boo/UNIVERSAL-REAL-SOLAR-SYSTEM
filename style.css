@@ -1,0 +1,372 @@
+/* =========================================================
+   UNIVERSAL REAL SOLAR SYSTEM
+   PREMIUM SPACE UI
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+}
+
+/* =========================================================
+   MAIN 3D AREA
+   ========================================================= */
+
+#solar-system {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(15, 25, 55, 0.35),
+            #000 65%
+        );
+    z-index: 1;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* =========================================================
+   UI LAYER
+   ========================================================= */
+
+#space-ui {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* =========================================================
+   TOP TITLE
+   ========================================================= */
+
+.top-title {
+    position: absolute;
+    top: 24px;
+    left: 28px;
+
+    padding: 14px 20px;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    border-left: 2px solid rgba(0, 200, 255, 0.9);
+
+    box-shadow:
+        0 0 20px rgba(0, 180, 255, 0.12),
+        inset 0 0 20px rgba(0, 150, 255, 0.04);
+
+    backdrop-filter: blur(8px);
+}
+
+.main-title {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: 6px;
+
+    color: #ffffff;
+
+    text-shadow:
+        0 0 10px rgba(0, 200, 255, 0.8),
+        0 0 25px rgba(0, 150, 255, 0.35);
+}
+
+.sub-title {
+    margin-top: 5px;
+
+    font-size: 11px;
+    letter-spacing: 4px;
+
+    color: #00d9ff;
+}
+
+/* =========================================================
+   SYSTEM STATUS
+   ========================================================= */
+
+.system-status {
+    position: absolute;
+
+    top: 30px;
+    right: 30px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 10px 16px;
+
+    border: 1px solid rgba(0, 220, 255, 0.35);
+
+    background: rgba(0, 10, 20, 0.5);
+
+    backdrop-filter: blur(8px);
+
+    font-size: 11px;
+    letter-spacing: 2px;
+
+    color: #9defff;
+}
+
+/* blinking green/blue indicator */
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #00ffb7;
+
+    box-shadow:
+        0 0 7px #00ffb7,
+        0 0 15px rgba(0, 255, 183, 0.8);
+
+    animation: statusBlink 1.5s infinite;
+}
+
+@keyframes statusBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* =========================================================
+   PLANET INFORMATION PANEL
+   ========================================================= */
+
+#planet-info {
+    position: absolute;
+
+    left: 28px;
+    bottom: 100px;
+
+    width: 260px;
+
+    padding: 17px;
+
+    background: rgba(0, 8, 18, 0.62);
+
+    border: 1px solid rgba(0, 190, 255, 0.35);
+
+    border-left: 3px solid #00cfff;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 0 25px rgba(0, 180, 255, 0.08),
+        inset 0 0 20px rgba(0, 150, 255, 0.03);
+}
+
+.info-title {
+    margin-bottom: 10px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    letter-spacing: 3px;
+
+    color: #00d9ff;
+}
+
+.info-line {
+    margin-top: 6px;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+
+    color: rgba(255, 255, 255, 0.72);
+}
+
+/* =========================================================
+   BOTTOM BUTTONS
+   ========================================================= */
+
+.bottom-controls {
+    position: absolute;
+
+    left: 50%;
+    bottom: 25px;
+
+    transform: translateX(-50%);
+
+    display: flex;
+    gap: 10px;
+
+    pointer-events: auto;
+}
+
+.bottom-controls button {
+    min-width: 105px;
+
+    padding: 10px 15px;
+
+    border: 1px solid rgba(0, 210, 255, 0.5);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0, 80, 120, 0.35),
+            rgba(0, 20, 40, 0.65)
+        );
+
+    color: #dffaff;
+
+    font-size: 10px;
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    backdrop-filter: blur(8px);
+
+    transition:
+        0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.bottom-controls button:hover {
+
+    color: #ffffff;
+
+    border-color: #00eaff;
+
+    box-shadow:
+        0 0 12px rgba(0, 220, 255, 0.45),
+        inset 0 0 12px rgba(0, 200, 255, 0.12);
+
+    transform: translateY(-2px);
+}
+
+.bottom-controls button:active {
+    transform: translateY(0);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .top-title {
+        top: 15px;
+        left: 15px;
+
+        padding: 10px 13px;
+    }
+
+    .main-title {
+        font-size: 18px;
+        letter-spacing: 4px;
+    }
+
+    .sub-title {
+        font-size: 8px;
+        letter-spacing: 2px;
+    }
+
+    .system-status {
+        top: 15px;
+        right: 15px;
+
+        padding: 8px 10px;
+
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    #planet-info {
+        left: 15px;
+        bottom: 82px;
+
+        width: 210px;
+
+        padding: 12px;
+    }
+
+    .info-title {
+        font-size: 11px;
+    }
+
+    .info-line {
+        font-size: 9px;
+    }
+
+    .bottom-controls {
+        bottom: 15px;
+
+        width: calc(100% - 30px);
+
+        justify-content: center;
+    }
+
+    .bottom-controls button {
+        min-width: 0;
+
+        flex: 1;
+
+        padding: 9px 5px;
+
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 430px) {
+
+    .system-status {
+        top: 65px;
+        right: 15px;
+    }
+
+    #planet-info {
+        bottom: 75px;
+        width: 190px;
+    }
+
+    .bottom-controls {
+        gap: 5px;
+    }
+}
+
+/* =========================================================
+   TOUCH DEVICE
+   ========================================================= */
+
+@media (hover: none) {
+
+    .bottom-controls button:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}
