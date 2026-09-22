@@ -1,106 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Universal Real Solar System</title>
+    <title>
+        UNIVERSAL REAL SOLAR SYSTEM
+    </title>
 
-    <!-- THREE.JS -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <!-- Three.js -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js">
+    </script>
 
-    <!-- THREE.JS ORBIT CONTROLS -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Import Map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three":
+            "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
 
-    <link rel="stylesheet" href="style.css">
+            "three/addons/":
+            "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- =====================================================
-         SPACE BACKGROUND
-    ====================================================== -->
 
-    <div id="space-ui">
+<!-- =====================================================
+     3D SOLAR SYSTEM
+====================================================== -->
 
-        <div class="top-title">
-            <div class="main-title">
-                UNIVERSAL
-            </div>
+<div id="solar-system"></div>
 
-            <div class="sub-title">
-                REAL SOLAR SYSTEM
-            </div>
+
+<!-- =====================================================
+     TOP HUD
+====================================================== -->
+
+<div class="hud">
+
+
+    <div class="brand">
+
+        <div class="brand-main">
+            UNIVERSAL
         </div>
 
-
-        <!-- STATUS -->
-
-        <div class="system-status">
-
-            <span class="status-dot"></span>
-
-            <span>
-                SOLAR SYSTEM ONLINE
-            </span>
-
-        </div>
-
-
-        <!-- PLANET INFORMATION -->
-
-        <div id="planet-info">
-
-            <div class="info-title">
-                SOLAR SYSTEM
-            </div>
-
-            <div class="info-line">
-                Select a planet
-            </div>
-
-            <div class="info-line">
-                3D orbital simulation
-            </div>
-
-        </div>
-
-
-        <!-- CAMERA CONTROLS -->
-
-        <div class="bottom-controls">
-
-            <button id="resetCamera">
-                RESET VIEW
-            </button>
-
-            <button id="toggleOrbits">
-                ORBITS
-            </button>
-
-            <button id="toggleLabels">
-                LABELS
-            </button>
-
+        <div class="brand-sub">
+            REAL SOLAR SYSTEM
         </div>
 
     </div>
 
 
-    <!-- =====================================================
-         3D SOLAR SYSTEM
-    ====================================================== -->
+    <div class="live-status">
 
-    <div id="solar-system"></div>
+        <span class="status-light"></span>
+
+        <span>
+            JPL DATA SYSTEM
+        </span>
+
+    </div>
 
 
-    <!-- MAIN SCRIPT -->
+    <!-- =================================================
+         INFORMATION PANEL
+    ================================================== -->
 
-    <script src="script.js"></script>
+    <div
+        id="planet-info"
+        class="planet-info"
+    >
+
+        <div class="info-title">
+            SOLAR SYSTEM
+        </div>
+
+        <div class="info-text">
+            किसी planet पर click करें
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         DATA STATUS
+    ================================================== -->
+
+    <div class="data-status">
+
+        <div>
+            DATA SOURCE
+        </div>
+
+        <strong>
+            NASA / JPL HORIZONS
+        </strong>
+
+        <small>
+            Astronomical Ephemeris
+        </small>
+
+    </div>
+
+
+    <!-- =================================================
+         CONTROLS
+    ================================================== -->
+
+    <div class="controls">
+
+        <button id="resetView">
+            RESET
+        </button>
+
+        <button id="toggleOrbits">
+            ORBITS
+        </button>
+
+        <button id="toggleLabels">
+            LABELS
+        </button>
+
+        <button id="realTime">
+            REAL TIME
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         LOADING
+    ================================================== -->
+
+    <div
+        id="loading"
+        class="loading"
+    >
+
+        <div class="loading-title">
+            INITIALIZING SOLAR SYSTEM
+        </div>
+
+        <div class="loading-bar">
+            <span></span>
+        </div>
+
+        <div class="loading-text">
+            Loading astronomical system...
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     MAIN JS
+====================================================== -->
+
+<script
+    type="module"
+    src="script.js">
+</script>
+
 
 </body>
+
 </html>
