@@ -1,27 +1,10 @@
 /* =========================================================
    UNIVERSAL REAL SOLAR SYSTEM
-   PART 8
-   REAL JPL HORIZONS VECTOR ENGINE
-
-   Data:
-   NASA/JPL Horizons
-
-   Features:
-   - Real planetary vectors
-   - Real Earth position
-   - Real Moon position
-   - Real velocity vectors
-   - Real UTC time
-   - Three.js 3D
-   - OrbitControls
+   FIXED PART 8
+   NASA / JPL HORIZONS + THREE.JS
    ========================================================= */
 
 "use strict";
-
-
-/* =========================================================
-   THREE.JS IMPORTS
-   ========================================================= */
 
 import * as THREE from "three";
 
@@ -31,7 +14,7 @@ import {
 
 
 /* =========================================================
-   JPL HORIZONS API
+   JPL API
    ========================================================= */
 
 const JPL_API =
@@ -39,7 +22,7 @@ const JPL_API =
 
 
 /* =========================================================
-   SOLAR SYSTEM OBJECTS
+   PLANETS
    ========================================================= */
 
 const PLANETS = {
@@ -58,8 +41,8 @@ const PLANETS = {
 
     Earth: {
         id: "399",
-        radius: 1.0,
-        color: 0x3d8cff
+        radius: 1.00,
+        color: 0x3188ff
     },
 
     Mars: {
@@ -70,13 +53,13 @@ const PLANETS = {
 
     Jupiter: {
         id: "599",
-        radius: 2.4,
+        radius: 2.40,
         color: 0xc99a6b
     },
 
     Saturn: {
         id: "699",
-        radius: 2.0,
+        radius: 2.00,
         color: 0xd8c49c
     },
 
@@ -88,7 +71,7 @@ const PLANETS = {
 
     Neptune: {
         id: "899",
-        radius: 1.5,
+        radius: 1.50,
         color: 0x4169e1
     }
 
@@ -114,23 +97,7 @@ const MOON = {
    VISUAL SCALE
    ========================================================= */
 
-/*
-   IMPORTANT:
-
-   Real solar-system distances are enormous.
-
-   Therefore this is a visualization scale.
-
-   The DATA remains real.
-   Only the visual size is enlarged.
-*/
-
 const AU_SCALE = 70;
-
-
-/* =========================================================
-   PLANET VISUAL SIZE
-   ========================================================= */
 
 const PLANET_VISUAL_SCALE = 1.8;
 
@@ -139,10 +106,13 @@ const PLANET_VISUAL_SCALE = 1.8;
    THREE VARIABLES
    ========================================================= */
 
-let scene;
-let camera;
-let renderer;
-let controls;
+let scene = null;
+
+let camera = null;
+
+let renderer = null;
+
+let controls = null;
 
 
 /* =========================================================
@@ -159,21 +129,16 @@ let moonMesh = null;
 
 let moonLabel = null;
 
+let sunMesh = null;
+
 let earthMoonLine = null;
 
-
-/* =========================================================
-   SUN
-   ========================================================= */
-
-let sunMesh;
+let orbitGroup = null;
 
 
 /* =========================================================
-   ORBITS
+   SETTINGS
    ========================================================= */
-
-let orbitGroup;
 
 let orbitsVisible = true;
 
@@ -181,7 +146,7 @@ let labelsVisible = true;
 
 
 /* =========================================================
-   LOADING
+   DOM
    ========================================================= */
 
 const loadingElement =
@@ -198,76 +163,77 @@ const currentTime =
 
 
 /* =========================================================
-   CURRENT JPL TIME
+   TIME
    ========================================================= */
 
 function getJPLDate() {
 
-    const now = new Date();
-
-    return now.toISOString();
+    return new Date().toISOString();
 
 }
 
-
-/* =========================================================
-   UPDATE TIME DISPLAY
-   ========================================================= */
 
 function updateClock() {
 
+    if (!currentTime) return;
+
     const now = new Date();
 
-    const utc =
+    currentTime.textContent =
         now.toISOString()
-           .replace("T", " ")
-           .replace("Z", " UTC");
-
-    currentTime.textContent = utc;
+        .replace("T", " ")
+        .replace("Z", " UTC");
 
 }
 
+
 updateClock();
 
-setInterval(updateClock, 1000);
+setInterval(
+    updateClock,
+    1000
+);
 
 
 /* =========================================================
-   SCENE INITIALIZATION
+   INITIALIZE THREE.JS
    ========================================================= */
 
 function initScene() {
 
-    scene = new THREE.Scene();
+    scene =
+        new THREE.Scene();
+
 
     scene.background =
-        new THREE.Color(0x02040a);
+        new THREE.Color(
+            0x02040a
+        );
 
 
     /* -----------------------------------------------------
        CAMERA
        ----------------------------------------------------- */
 
-    camera = new THREE.PerspectiveCamera(
+    camera =
+        new THREE.PerspectiveCamera(
 
-        50,
+            50,
 
-        window.innerWidth /
-        window.innerHeight,
+            window.innerWidth /
+            window.innerHeight,
 
-        0.1,
+            0.1,
 
-        100000
+            100000
 
-    );
+        );
 
 
     camera.position.set(
 
         0,
-
         450,
-
         900
 
     );
@@ -282,7 +248,8 @@ function initScene() {
 
             antialias: true,
 
-            powerPreference: "high-performance"
+            powerPreference:
+                "high-performance"
 
         });
 
@@ -309,13 +276,19 @@ function initScene() {
         THREE.SRGBColorSpace;
 
 
-    document
-        .getElementById("solar-system")
-        .appendChild(renderer.domElement);
+    const container =
+        document.getElementById(
+            "solar-system"
+        );
+
+
+    container.appendChild(
+        renderer.domElement
+    );
 
 
     /* -----------------------------------------------------
-       CONTROLS
+       ORBIT CONTROLS
        ----------------------------------------------------- */
 
     controls =
@@ -343,7 +316,7 @@ function initScene() {
 
 
     /* -----------------------------------------------------
-       LIGHTING
+       LIGHT
        ----------------------------------------------------- */
 
     const ambientLight =
@@ -354,7 +327,10 @@ function initScene() {
 
         );
 
-    scene.add(ambientLight);
+
+    scene.add(
+        ambientLight
+    );
 
 
     const sunLight =
@@ -366,17 +342,21 @@ function initScene() {
 
         );
 
+
     sunLight.position.set(
         0,
         0,
         0
     );
 
-    scene.add(sunLight);
+
+    scene.add(
+        sunLight
+    );
 
 
     /* -----------------------------------------------------
-       STAR FIELD
+       STARS
        ----------------------------------------------------- */
 
     createStarField();
@@ -396,7 +376,10 @@ function initScene() {
     orbitGroup =
         new THREE.Group();
 
-    scene.add(orbitGroup);
+
+    scene.add(
+        orbitGroup
+    );
 
 
     /* -----------------------------------------------------
@@ -409,6 +392,18 @@ function initScene() {
         onWindowResize
 
     );
+
+
+    /*
+       IMPORTANT FIX:
+
+       renderer exists now.
+
+       Therefore click handler is attached
+       ONLY AFTER renderer creation.
+    */
+
+    setupClickHandler();
 
 }
 
@@ -509,7 +504,9 @@ function createStarField() {
         );
 
 
-    scene.add(stars);
+    scene.add(
+        stars
+    );
 
 }
 
@@ -524,7 +521,6 @@ function createSun() {
         new THREE.SphereGeometry(
 
             15,
-
             64,
             64
 
@@ -548,20 +544,27 @@ function createSun() {
         );
 
 
-    sunMesh.name = "Sun";
+    sunMesh.name =
+        "Sun";
 
-    scene.add(sunMesh);
+
+    sunMesh.userData.objectName =
+        "Sun";
+
+
+    scene.add(
+        sunMesh
+    );
 
 
     /* -----------------------------------------------------
-       SUN GLOW
+       GLOW
        ----------------------------------------------------- */
 
     const glowGeometry =
         new THREE.SphereGeometry(
 
             22,
-
             32,
             32
 
@@ -591,15 +594,14 @@ function createSun() {
         );
 
 
-    sunMesh.add(glow);
+    sunMesh.add(
+        glow
+    );
 
 
     createLabel(
-
         sunMesh,
-
         "SUN"
-
     );
 
 }
@@ -649,12 +651,17 @@ function createPlanet(
         );
 
 
-    mesh.name = name;
+    mesh.name =
+        name;
+
 
     mesh.userData.objectName =
         name;
 
-    scene.add(mesh);
+
+    scene.add(
+        mesh
+    );
 
 
     planetMeshes[name] =
@@ -709,13 +716,17 @@ function createMoon() {
         );
 
 
-    moonMesh.name = "Moon";
+    moonMesh.name =
+        "Moon";
+
 
     moonMesh.userData.objectName =
         "Moon";
 
 
-    scene.add(moonMesh);
+    scene.add(
+        moonMesh
+    );
 
 
     createLabel(
@@ -730,7 +741,7 @@ function createMoon() {
 
 
 /* =========================================================
-   LABEL SYSTEM
+   LABEL
    ========================================================= */
 
 function createLabel(
@@ -741,7 +752,9 @@ function createLabel(
 ) {
 
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
 
 
     canvas.width = 512;
@@ -750,7 +763,9 @@ function createLabel(
 
 
     const ctx =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
     ctx.clearRect(
@@ -790,9 +805,7 @@ function createLabel(
 
     const texture =
         new THREE.CanvasTexture(
-
             canvas
-
         );
 
 
@@ -814,9 +827,7 @@ function createLabel(
 
     const sprite =
         new THREE.Sprite(
-
             material
-
         );
 
 
@@ -832,12 +843,17 @@ function createLabel(
     sprite.position.y = 5;
 
 
-    object.add(sprite);
+    object.add(
+        sprite
+    );
 
 
-    if (text === "MOON") {
+    if (
+        text === "MOON"
+    ) {
 
-        moonLabel = sprite;
+        moonLabel =
+            sprite;
 
     } else {
 
@@ -850,24 +866,25 @@ function createLabel(
 
 
 /* =========================================================
-   BUILD PLANETS
+   BUILD OBJECTS
    ========================================================= */
 
 function buildObjects() {
 
-    Object.entries(PLANETS)
-        .forEach(
+    Object.entries(
+        PLANETS
+    ).forEach(
 
-            ([name, config]) => {
+        ([name, config]) => {
 
-                createPlanet(
-                    name,
-                    config
-                );
+            createPlanet(
+                name,
+                config
+            );
 
-            }
+        }
 
-        );
+    );
 
 
     createMoon();
@@ -876,7 +893,7 @@ function buildObjects() {
 
 
 /* =========================================================
-   BUILD JPL QUERY
+   JPL URL
    ========================================================= */
 
 function buildJPLURL(
@@ -891,42 +908,61 @@ function buildJPLURL(
 
             format: "json",
 
-            COMMAND: `'${command}'`,
+            COMMAND:
+                `'${command}'`,
 
-            OBJ_DATA: "NO",
+            OBJ_DATA:
+                "NO",
 
-            MAKE_EPHEM: "YES",
+            MAKE_EPHEM:
+                "YES",
 
-            EPHEM_TYPE: "VECTORS",
+            EPHEM_TYPE:
+                "VECTORS",
 
-            CENTER: `'${center}'`,
+            CENTER:
+                `'${center}'`,
 
-            TLIST: `'${getJPLDate()}'`,
+            TLIST:
+                `'${getJPLDate()}'`,
 
-            TLIST_TYPE: "CAL",
+            TLIST_TYPE:
+                "CAL",
 
-            REF_PLANE: "ECLIPTIC",
+            REF_PLANE:
+                "ECLIPTIC",
 
-            REF_SYSTEM: "ICRF",
+            REF_SYSTEM:
+                "ICRF",
 
-            OUT_UNITS: "AU-D",
+            OUT_UNITS:
+                "AU-D",
 
-            VEC_TABLE: "2",
+            VEC_TABLE:
+                "2",
 
-            VEC_LABELS: "YES",
+            VEC_LABELS:
+                "YES",
 
-            CSV_FORMAT: "NO"
+            CSV_FORMAT:
+                "NO"
 
         });
 
 
-    return `${JPL_API}?${params.toString()}`;
+    return (
+
+        JPL_API +
+        "?" +
+        params.toString()
+
+    );
 
 }
 
 
 /* =========================================================
-   FETCH JPL DATA
+   FETCH JPL
    ========================================================= */
 
 async function fetchJPL(
@@ -951,6 +987,7 @@ async function fetchJPL(
             url,
 
             {
+
                 method: "GET",
 
                 cache: "no-store"
@@ -964,7 +1001,8 @@ async function fetchJPL(
 
         throw new Error(
 
-            `JPL HTTP ${response.status}`
+            "JPL HTTP " +
+            response.status
 
         );
 
@@ -975,49 +1013,37 @@ async function fetchJPL(
         await response.json();
 
 
-    if (
-        data.error
-    ) {
+    if (data.error) {
 
         throw new Error(
-
             data.error
-
         );
 
     }
 
 
-    if (
-        !data.result
-    ) {
+    if (!data.result) {
 
         throw new Error(
-
-            "JPL returned no ephemeris result."
-
+            "JPL returned no result."
         );
 
     }
 
 
     return parseJPLVector(
-
         data.result
-
     );
 
 }
 
 
 /* =========================================================
-   PARSE JPL VECTOR
+   PARSE VECTOR
    ========================================================= */
 
 function parseJPLVector(
-
     result
-
 ) {
 
     const soe =
@@ -1038,9 +1064,7 @@ function parseJPLVector(
     ) {
 
         throw new Error(
-
-            "JPL vector block not found."
-
+            "JPL vector block missing."
         );
 
     }
@@ -1048,84 +1072,68 @@ function parseJPLVector(
 
     const block =
         result.substring(
-
             soe,
             eoe
-
         );
 
 
-    /*
-       Horizons VECTORS output contains:
+    const getValue =
+        (key) => {
 
-       X =
-       Y =
-       Z =
+            const regex =
+                new RegExp(
 
-       VX =
-       VY =
-       VZ =
-    */
+                    key +
+                    "\\s*=\\s*" +
+                    "([+-]?" +
+                    "\\d+(?:\\.\\d+)?" +
+                    "(?:E[+-]?\\d+)?)",
 
+                    "i"
 
-    const xMatch =
-        block.match(
-
-            /X\s*=\s*([+-]?\d+(?:\.\d+)?(?:E[+-]?\d+)?)/i
-
-        );
+                );
 
 
-    const yMatch =
-        block.match(
-
-            /Y\s*=\s*([+-]?\d+(?:\.\d+)?(?:E[+-]?\d+)?)/i
-
-        );
+            const match =
+                block.match(
+                    regex
+                );
 
 
-    const zMatch =
-        block.match(
+            return match
+                ? Number(match[1])
+                : null;
 
-            /Z\s*=\s*([+-]?\d+(?:\.\d+)?(?:E[+-]?\d+)?)/i
-
-        );
-
-
-    const vxMatch =
-        block.match(
-
-            /VX\s*=\s*([+-]?\d+(?:\.\d+)?(?:E[+-]?\d+)?)/i
-
-        );
+        };
 
 
-    const vyMatch =
-        block.match(
+    const x =
+        getValue("X");
 
-            /VY\s*=\s*([+-]?\d+(?:\.\d+)?(?:E[+-]?\d+)?)/i
+    const y =
+        getValue("Y");
 
-        );
+    const z =
+        getValue("Z");
 
+    const vx =
+        getValue("VX");
 
-    const vzMatch =
-        block.match(
+    const vy =
+        getValue("VY");
 
-            /VZ\s*=\s*([+-]?\d+(?:\.\d+)?(?:E[+-]?\d+)?)/i
-
-        );
+    const vz =
+        getValue("VZ");
 
 
     if (
-        !xMatch ||
-        !yMatch ||
-        !zMatch
+        x === null ||
+        y === null ||
+        z === null
     ) {
 
         throw new Error(
-
-            "Could not parse JPL XYZ vector."
-
+            "Could not read JPL XYZ."
         );
 
     }
@@ -1133,26 +1141,18 @@ function parseJPLVector(
 
     return {
 
-        x: Number(xMatch[1]),
-
-        y: Number(yMatch[1]),
-
-        z: Number(zMatch[1]),
+        x,
+        y,
+        z,
 
         vx:
-            vxMatch
-                ? Number(vxMatch[1])
-                : 0,
+            vx ?? 0,
 
         vy:
-            vyMatch
-                ? Number(vyMatch[1])
-                : 0,
+            vy ?? 0,
 
         vz:
-            vzMatch
-                ? Number(vzMatch[1])
-                : 0
+            vz ?? 0
 
     };
 
@@ -1160,35 +1160,23 @@ function parseJPLVector(
 
 
 /* =========================================================
-   JPL → THREE COORDINATE CONVERSION
+   JPL → THREE
    ========================================================= */
 
 function jplToThree(
-
     vector
-
 ) {
-
-    /*
-       JPL:
-       X = ecliptic X
-       Y = ecliptic Y
-       Z = ecliptic Z
-
-       Three.js:
-       X = horizontal
-       Y = vertical
-       Z = depth
-    */
-
 
     return new THREE.Vector3(
 
-        vector.x * AU_SCALE,
+        vector.x *
+        AU_SCALE,
 
-        vector.z * AU_SCALE,
+        vector.z *
+        AU_SCALE,
 
-        -vector.y * AU_SCALE
+        -vector.y *
+        AU_SCALE
 
     );
 
@@ -1196,7 +1184,7 @@ function jplToThree(
 
 
 /* =========================================================
-   LOAD PLANET DATA
+   LOAD PLANET
    ========================================================= */
 
 async function loadPlanet(
@@ -1207,7 +1195,9 @@ async function loadPlanet(
 ) {
 
     loadingText.textContent =
-        `Loading ${name} from JPL Horizons...`;
+        "Loading " +
+        name +
+        " from JPL Horizons...";
 
 
     const vector =
@@ -1226,37 +1216,19 @@ async function loadPlanet(
 
     const position =
         jplToThree(
-
             vector
-
         );
 
 
     planetMeshes[name]
         .position.copy(
-
             position
-
         );
-
-
-    /*
-       Store original vector
-       for information panel.
-    */
 
 
     planetMeshes[name]
         .userData.jplVector =
         vector;
-
-
-    createRealOrbitMarker(
-
-        name,
-        position
-
-    );
 
 }
 
@@ -1268,16 +1240,7 @@ async function loadPlanet(
 async function loadMoon() {
 
     loadingText.textContent =
-        "Loading Moon relative to Earth...";
-
-
-    /*
-       Earth = 399
-
-       Moon = 301
-
-       CENTER = Earth geocenter
-    */
+        "Loading Moon from JPL Horizons...";
 
 
     const vector =
@@ -1290,25 +1253,30 @@ async function loadMoon() {
         );
 
 
-    const earth =
-        planetMeshes.Earth;
-
-
     const moonRelative =
         jplToThree(
-
             vector
-
         );
+
+
+    if (
+        !planetMeshes.Earth
+    ) {
+
+        throw new Error(
+            "Earth not loaded."
+        );
+
+    }
 
 
     moonMesh.position.copy(
 
-        earth.position.clone()
+        planetMeshes.Earth
+            .position
+            .clone()
             .add(
-
                 moonRelative
-
             )
 
     );
@@ -1318,52 +1286,13 @@ async function loadMoon() {
         vector;
 
 
-    /*
-       Earth → Moon line
-    */
-
     createEarthMoonLine();
 
 }
 
 
 /* =========================================================
-   REAL POSITION MARKER
-   ========================================================= */
-
-function createRealOrbitMarker(
-
-    name,
-    position
-
-) {
-
-    /*
-       This is NOT a fake orbit.
-
-       It is a point showing the
-       current JPL position.
-
-       Full orbital tracks will be
-       added in the next stage using
-       multiple JPL ephemeris samples.
-    */
-
-
-    if (
-        !planetMeshes[name]
-    ) return;
-
-
-    planetMeshes[name]
-        .userData.realPosition =
-        position.clone();
-
-}
-
-
-/* =========================================================
-   EARTH-MOON LINE
+   EARTH → MOON LINE
    ========================================================= */
 
 function createEarthMoonLine() {
@@ -1377,28 +1306,24 @@ function createEarthMoonLine() {
     }
 
 
-    if (
-        !planetMeshes.Earth ||
-        !moonMesh
-    ) return;
-
-
     const points = [
 
-        planetMeshes.Earth.position.clone(),
+        planetMeshes.Earth
+            .position
+            .clone(),
 
-        moonMesh.position.clone()
+        moonMesh
+            .position
+            .clone()
 
     ];
 
 
     const geometry =
         new THREE.BufferGeometry()
-            .setFromPoints(
-
-                points
-
-            );
+        .setFromPoints(
+            points
+        );
 
 
     const material =
@@ -1423,32 +1348,17 @@ function createEarthMoonLine() {
 
 
     scene.add(
-
         earthMoonLine
-
     );
 
 }
 
 
 /* =========================================================
-   REAL ORBIT VISUALIZATION
+   ORBIT GUIDES
    ========================================================= */
 
 function buildOrbitGuides() {
-
-    /*
-       For now we create guide circles
-       based on the current real distance.
-
-       IMPORTANT:
-       Planet POSITION is from JPL.
-
-       Next stage:
-       multiple JPL time samples will
-       generate actual orbital curves.
-    */
-
 
     while (
         orbitGroup.children.length
@@ -1457,263 +1367,125 @@ function buildOrbitGuides() {
         const child =
             orbitGroup.children.pop();
 
-        child.geometry?.dispose();
 
-        child.material?.dispose();
+        if (child.geometry) {
 
-    }
-
-
-    Object.keys(PLANETS)
-        .forEach(
-
-            name => {
-
-                const mesh =
-                    planetMeshes[name];
-
-
-                if (!mesh)
-                    return;
-
-
-                const radius =
-                    Math.sqrt(
-
-                        mesh.position.x *
-                        mesh.position.x +
-
-                        mesh.position.y *
-                        mesh.position.y +
-
-                        mesh.position.z *
-                        mesh.position.z
-
-                    );
-
-
-                if (
-                    radius < 1
-                ) return;
-
-
-                const points = [];
-
-
-                for (
-                    let i = 0;
-                    i <= 256;
-                    i++
-                ) {
-
-                    const angle =
-                        (i / 256) *
-                        Math.PI *
-                        2;
-
-
-                    points.push(
-
-                        new THREE.Vector3(
-
-                            Math.cos(angle) *
-                            radius,
-
-                            0,
-
-                            Math.sin(angle) *
-                            radius
-
-                        )
-
-                    );
-
-                }
-
-
-                const geometry =
-                    new THREE.BufferGeometry()
-                        .setFromPoints(
-
-                            points
-
-                        );
-
-
-                const material =
-                    new THREE.LineBasicMaterial({
-
-                        color: 0x1689a8,
-
-                        transparent: true,
-
-                        opacity: 0.28
-
-                    });
-
-
-                const line =
-                    new THREE.LineLoop(
-
-                        geometry,
-                        material
-
-                    );
-
-
-                line.userData.guide =
-                    true;
-
-
-                orbitGroup.add(line);
-
-            }
-
-        );
-
-}
-
-
-/* =========================================================
-   LOAD COMPLETE SOLAR SYSTEM
-   ========================================================= */
-
-async function loadRealSolarSystem() {
-
-    loadingElement.style.display =
-        "flex";
-
-
-    jplStatus.textContent =
-        "CONNECTING TO JPL HORIZONS";
-
-
-    try {
-
-        /*
-           Clear old data
-        */
-
-        Object.keys(
-            planetData
-        ).forEach(
-
-            key => {
-
-                delete planetData[key];
-
-            }
-
-        );
-
-
-        /*
-           Load planets one by one.
-        */
-
-        for (
-            const [
-                name,
-                config
-            ]
-            of Object.entries(PLANETS)
-        ) {
-
-            await loadPlanet(
-
-                name,
-                config
-
-            );
+            child.geometry.dispose();
 
         }
 
 
-        /*
-           Moon
-        */
+        if (child.material) {
 
-        await loadMoon();
+            child.material.dispose();
 
-
-        /*
-           Build visual orbit guides
-        */
-
-        buildOrbitGuides();
-
-
-        /*
-           SUCCESS
-        */
-
-        jplStatus.textContent =
-            "JPL HORIZONS • LIVE DATA";
-
-
-        jplStatus.style.color =
-            "#55ff99";
-
-
-        loadingText.textContent =
-            "REAL JPL SOLAR SYSTEM LOADED";
-
-
-        setTimeout(
-
-            () => {
-
-                loadingElement.style.display =
-                    "none";
-
-            },
-
-            700
-
-        );
-
-
-    } catch (error) {
-
-        console.error(
-
-            "JPL ERROR:",
-            error
-
-        );
-
-
-        jplStatus.textContent =
-            "JPL DATA ERROR";
-
-
-        jplStatus.style.color =
-            "#ff4d6d";
-
-
-        loadingText.textContent =
-            "JPL CONNECTION ERROR — CHECK BROWSER CONSOLE";
-
-
-        /*
-           Keep loading panel visible
-           so user knows the real data
-           did not load.
-        */
+        }
 
     }
+
+
+    Object.keys(
+        PLANETS
+    ).forEach(
+
+        name => {
+
+            const mesh =
+                planetMeshes[name];
+
+
+            if (!mesh)
+                return;
+
+
+            const radius =
+                mesh.position.length();
+
+
+            if (radius < 1)
+                return;
+
+
+            const points = [];
+
+
+            for (
+                let i = 0;
+                i <= 256;
+                i++
+            ) {
+
+                const angle =
+                    i /
+                    256 *
+                    Math.PI *
+                    2;
+
+
+                points.push(
+
+                    new THREE.Vector3(
+
+                        Math.cos(angle) *
+                        radius,
+
+                        0,
+
+                        Math.sin(angle) *
+                        radius
+
+                    )
+
+                );
+
+            }
+
+
+            const geometry =
+                new THREE.BufferGeometry()
+                .setFromPoints(
+                    points
+                );
+
+
+            const material =
+                new THREE.LineBasicMaterial({
+
+                    color: 0x1689a8,
+
+                    transparent: true,
+
+                    opacity: 0.28
+
+                });
+
+
+            const line =
+                new THREE.LineLoop(
+
+                    geometry,
+                    material
+
+                );
+
+
+            orbitGroup.add(
+                line
+            );
+
+        }
+
+    );
 
 }
 
 
 /* =========================================================
-   PLANET INFORMATION
+   OBJECT INFORMATION
    ========================================================= */
 
 function showObjectInfo(
-
     name
-
 ) {
 
     const title =
@@ -1728,6 +1500,10 @@ function showObjectInfo(
         );
 
 
+    if (!title || !data)
+        return;
+
+
     if (
         name === "Sun"
     ) {
@@ -1737,10 +1513,9 @@ function showObjectInfo(
 
 
         data.innerHTML =
-
             `
-            Central star<br>
-            Reference origin: JPL Solar System
+            Central Star<br>
+            JPL Solar System Reference
             `;
 
 
@@ -1754,7 +1529,13 @@ function showObjectInfo(
     ) {
 
         const vector =
-            moonMesh.userData.jplVector;
+            moonMesh
+                ?.userData
+                ?.jplVector;
+
+
+        if (!vector)
+            return;
 
 
         title.textContent =
@@ -1762,14 +1543,17 @@ function showObjectInfo(
 
 
         data.innerHTML =
-
             `
             JPL ID: 301<br>
             Reference: Earth Geocenter<br><br>
 
+            POSITION<br>
+
             X: ${vector.x.toFixed(8)} AU<br>
             Y: ${vector.y.toFixed(8)} AU<br>
             Z: ${vector.z.toFixed(8)} AU<br><br>
+
+            VELOCITY<br>
 
             VX: ${vector.vx.toFixed(8)} AU/day<br>
             VY: ${vector.vy.toFixed(8)} AU/day<br>
@@ -1795,16 +1579,17 @@ function showObjectInfo(
 
 
     data.innerHTML =
-
         `
         JPL ID: ${PLANETS[name].id}<br><br>
 
         POSITION<br>
+
         X: ${vector.x.toFixed(8)} AU<br>
         Y: ${vector.y.toFixed(8)} AU<br>
         Z: ${vector.z.toFixed(8)} AU<br><br>
 
         VELOCITY<br>
+
         VX: ${vector.vx.toFixed(8)} AU/day<br>
         VY: ${vector.vy.toFixed(8)} AU/day<br>
         VZ: ${vector.vz.toFixed(8)} AU/day
@@ -1814,40 +1599,71 @@ function showObjectInfo(
 
 
 /* =========================================================
-   CLICK DETECTION
+   CLICK HANDLER
    ========================================================= */
 
-const raycaster =
-    new THREE.Raycaster();
+function setupClickHandler() {
+
+    /*
+       SAFETY CHECK
+
+       This function is called only after
+       renderer has been created.
+    */
+
+    if (!renderer) {
+
+        console.error(
+            "Renderer is not initialized."
+        );
+
+        return;
+
+    }
 
 
-const mouse =
-    new THREE.Vector2();
+    const raycaster =
+        new THREE.Raycaster();
 
 
-rendererClickHandler();
+    const mouse =
+        new THREE.Vector2();
 
-
-function rendererClickHandler() {
 
     renderer.domElement.addEventListener(
 
         "pointerdown",
 
-        event => {
+        function(event) {
+
+            const rect =
+                renderer
+                    .domElement
+                    .getBoundingClientRect();
+
 
             mouse.x =
                 (
-                    event.clientX /
-                    window.innerWidth
-                ) * 2 - 1;
+                    (
+                        event.clientX -
+                        rect.left
+                    ) /
+                    rect.width
+                ) *
+                2 -
+                1;
 
 
             mouse.y =
                 -(
-                    event.clientY /
-                    window.innerHeight
-                ) * 2 + 1;
+                    (
+                        event.clientY -
+                        rect.top
+                    ) /
+                    rect.height
+                ) *
+                2 +
+                1;
 
 
             raycaster.setFromCamera(
@@ -1873,28 +1689,32 @@ function rendererClickHandler() {
 
             const hits =
                 raycaster.intersectObjects(
-
-                    objects
-
+                    objects,
+                    false
                 );
 
 
             if (
-                hits.length
+                hits.length === 0
             ) {
 
-                const object =
-                    hits[0].object;
-
-
-                showObjectInfo(
-
-                    object.userData.objectName ||
-                    object.name
-
-                );
+                return;
 
             }
+
+
+            const object =
+                hits[0].object;
+
+
+            const name =
+                object.userData.objectName ||
+                object.name;
+
+
+            showObjectInfo(
+                name
+            );
 
         }
 
@@ -1904,16 +1724,16 @@ function rendererClickHandler() {
 
 
 /* =========================================================
-   RESET CAMERA
+   RESET VIEW
    ========================================================= */
 
 document
     .getElementById("resetView")
-    .addEventListener(
+    ?.addEventListener(
 
         "click",
 
-        () => {
+        function() {
 
             camera.position.set(
 
@@ -1941,16 +1761,16 @@ document
 
 
 /* =========================================================
-   ORBIT TOGGLE
+   ORBITS
    ========================================================= */
 
 document
     .getElementById("toggleOrbits")
-    .addEventListener(
+    ?.addEventListener(
 
         "click",
 
-        () => {
+        function() {
 
             orbitsVisible =
                 !orbitsVisible;
@@ -1965,16 +1785,16 @@ document
 
 
 /* =========================================================
-   LABEL TOGGLE
+   LABELS
    ========================================================= */
 
 document
     .getElementById("toggleLabels")
-    .addEventListener(
+    ?.addEventListener(
 
         "click",
 
-        () => {
+        function() {
 
             labelsVisible =
                 !labelsVisible;
@@ -2007,16 +1827,16 @@ document
 
 
 /* =========================================================
-   REAL TIME REFRESH
+   REAL TIME
    ========================================================= */
 
 document
     .getElementById("realTime")
-    .addEventListener(
+    ?.addEventListener(
 
         "click",
 
-        async () => {
+        async function() {
 
             await loadRealSolarSystem();
 
@@ -2032,15 +1852,9 @@ document
 function animate() {
 
     requestAnimationFrame(
-
         animate
-
     );
 
-
-    /*
-       Planet rotation
-    */
 
     Object.values(
         planetMeshes
@@ -2064,27 +1878,31 @@ function animate() {
     }
 
 
-    /*
-       Update Earth-Moon connector
-    */
-
-    if (earthMoonLine) {
+    if (
+        earthMoonLine &&
+        planetMeshes.Earth &&
+        moonMesh
+    ) {
 
         const positions =
-            earthMoonLine.geometry
+            earthMoonLine
+                .geometry
                 .attributes
                 .position
                 .array;
 
 
         positions[0] =
-            planetMeshes.Earth.position.x;
+            planetMeshes.Earth
+                .position.x;
 
         positions[1] =
-            planetMeshes.Earth.position.y;
+            planetMeshes.Earth
+                .position.y;
 
         positions[2] =
-            planetMeshes.Earth.position.z;
+            planetMeshes.Earth
+                .position.z;
 
 
         positions[3] =
@@ -2097,7 +1915,8 @@ function animate() {
             moonMesh.position.z;
 
 
-        earthMoonLine.geometry
+        earthMoonLine
+            .geometry
             .attributes
             .position
             .needsUpdate =
@@ -2106,15 +1925,107 @@ function animate() {
     }
 
 
-    controls.update();
+    if (controls) {
+
+        controls.update();
+
+    }
 
 
     renderer.render(
-
         scene,
         camera
-
     );
+
+}
+
+
+/* =========================================================
+   LOAD COMPLETE SYSTEM
+   ========================================================= */
+
+async function loadRealSolarSystem() {
+
+    loadingElement.style.display =
+        "flex";
+
+
+    jplStatus.textContent =
+        "CONNECTING TO JPL HORIZONS";
+
+
+    try {
+
+        for (
+            const [
+                name,
+                config
+            ]
+            of Object.entries(PLANETS)
+        ) {
+
+            await loadPlanet(
+
+                name,
+                config
+
+            );
+
+        }
+
+
+        await loadMoon();
+
+
+        buildOrbitGuides();
+
+
+        jplStatus.textContent =
+            "JPL HORIZONS • LIVE DATA";
+
+
+        jplStatus.style.color =
+            "#55ff99";
+
+
+        loadingText.textContent =
+            "REAL JPL DATA LOADED";
+
+
+        setTimeout(
+
+            function() {
+
+                loadingElement.style.display =
+                    "none";
+
+            },
+
+            700
+
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "JPL ERROR:",
+            error
+        );
+
+
+        jplStatus.textContent =
+            "JPL CONNECTION ERROR";
+
+
+        jplStatus.style.color =
+            "#ff4d6d";
+
+
+        loadingText.textContent =
+            "JPL DATA ERROR — CHECK CONSOLE";
+
+    }
 
 }
 
@@ -2124,6 +2035,12 @@ function animate() {
    ========================================================= */
 
 function onWindowResize() {
+
+    if (
+        !camera ||
+        !renderer
+    ) return;
+
 
     camera.aspect =
         window.innerWidth /
@@ -2144,7 +2061,7 @@ function onWindowResize() {
 
 
 /* =========================================================
-   START SYSTEM
+   START
    ========================================================= */
 
 initScene();
