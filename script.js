@@ -1,39 +1,62 @@
 /* =========================================================
    UNIVERSAL REAL SOLAR SYSTEM
-   PART 4 — REALISTIC PLANETS + EARTH + MOON
+   PART 7
+   JPL HORIZONS REAL DATA ENGINE
    ========================================================= */
 
 "use strict";
 
-const container = document.getElementById("solar-system");
-const infoPanel = document.getElementById("planet-info");
+/* =========================================================
+   BASIC REFERENCES
+========================================================= */
 
-const scene = new THREE.Scene();
+const container =
+    document.getElementById("solar-system");
+
+const infoPanel =
+    document.getElementById("planet-info");
+
+const loading =
+    document.getElementById("loading");
+
+const scene =
+    new THREE.Scene();
+
 
 /* =========================================================
    CAMERA
 ========================================================= */
 
-const camera = new THREE.PerspectiveCamera(
-    55,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    5000
-);
+const camera =
+    new THREE.PerspectiveCamera(
+        55,
+        window.innerWidth /
+        window.innerHeight,
+        0.01,
+        100000
+    );
 
-camera.position.set(0, 180, 420);
+camera.position.set(
+    0,
+    180,
+    420
+);
 
 
 /* =========================================================
    RENDERER
 ========================================================= */
 
-const renderer = new THREE.WebGLRenderer({
-    antialias: true
-});
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true
+    });
 
 renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio, 2)
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
 );
 
 renderer.setSize(
@@ -50,7 +73,7 @@ container.appendChild(
 
 
 /* =========================================================
-   CONTROLS
+   ORBIT CONTROLS
 ========================================================= */
 
 const controls =
@@ -60,31 +83,32 @@ const controls =
     );
 
 controls.enableDamping = true;
+
 controls.dampingFactor = 0.05;
 
-controls.minDistance = 25;
-controls.maxDistance = 1500;
+controls.minDistance = 2;
+
+controls.maxDistance = 3000;
 
 
 /* =========================================================
-   LIGHT
+   LIGHTING
 ========================================================= */
 
-const ambientLight =
+const ambient =
     new THREE.AmbientLight(
         0xffffff,
         0.08
     );
 
-scene.add(ambientLight);
+scene.add(ambient);
 
 
 const sunLight =
     new THREE.PointLight(
         0xffffff,
-        3.5,
-        0,
-        1
+        4,
+        0
     );
 
 sunLight.position.set(
@@ -94,6 +118,77 @@ sunLight.position.set(
 );
 
 scene.add(sunLight);
+
+
+/* =========================================================
+   STAR FIELD
+========================================================= */
+
+const starGeometry =
+    new THREE.BufferGeometry();
+
+const STAR_COUNT = 15000;
+
+const starPositions =
+    new Float32Array(
+        STAR_COUNT * 3
+    );
+
+for (
+    let i = 0;
+    i < STAR_COUNT;
+    i++
+) {
+
+    const r =
+        1000 +
+        Math.random() * 2500;
+
+    const theta =
+        Math.random() *
+        Math.PI * 2;
+
+    const phi =
+        Math.acos(
+            2 * Math.random() - 1
+        );
+
+    starPositions[i * 3] =
+        r *
+        Math.sin(phi) *
+        Math.cos(theta);
+
+    starPositions[i * 3 + 1] =
+        r *
+        Math.cos(phi);
+
+    starPositions[i * 3 + 2] =
+        r *
+        Math.sin(phi) *
+        Math.sin(theta);
+}
+
+starGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(
+        starPositions,
+        3
+    )
+);
+
+const starMaterial =
+    new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 1.2
+    });
+
+const stars =
+    new THREE.Points(
+        starGeometry,
+        starMaterial
+    );
+
+scene.add(stars);
 
 
 /* =========================================================
@@ -134,9 +229,9 @@ const glowGeometry =
 
 const glowMaterial =
     new THREE.MeshBasicMaterial({
-        color: 0xff8800,
+        color: 0xff8c00,
         transparent: true,
-        opacity: 0.14
+        opacity: 0.13
     });
 
 const sunGlow =
@@ -145,428 +240,363 @@ const sunGlow =
         glowMaterial
     );
 
-scene.add(sunGlow);
-
-
-/* =========================================================
-   STAR FIELD
-========================================================= */
-
-const starGeometry =
-    new THREE.BufferGeometry();
-
-const starCount = 14000;
-
-const starPositions =
-    new Float32Array(
-        starCount * 3
-    );
-
-for (
-    let i = 0;
-    i < starCount;
-    i++
-) {
-
-    const radius =
-        700 +
-        Math.random() * 1500;
-
-    const theta =
-        Math.random() *
-        Math.PI * 2;
-
-    const phi =
-        Math.acos(
-            2 * Math.random() - 1
-        );
-
-    starPositions[i * 3] =
-        radius *
-        Math.sin(phi) *
-        Math.cos(theta);
-
-    starPositions[i * 3 + 1] =
-        radius *
-        Math.cos(phi);
-
-    starPositions[i * 3 + 2] =
-        radius *
-        Math.sin(phi) *
-        Math.sin(theta);
-}
-
-starGeometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-        starPositions,
-        3
-    )
+scene.add(
+    sunGlow
 );
 
-const starMaterial =
-    new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 1.1
-    });
-
-const stars =
-    new THREE.Points(
-        starGeometry,
-        starMaterial
-    );
-
-scene.add(stars);
-
 
 /* =========================================================
-   TEXTURE LOADER
+   PLANET DATABASE
 ========================================================= */
-
-const textureLoader =
-    new THREE.TextureLoader();
-
 
 /*
-   Public NASA-style texture URLs.
-   If a texture is unavailable, the
-   fallback color remains visible.
+   Horizons major-body IDs
+
+   Sun       = 10
+   Mercury   = 199
+   Venus     = 299
+   Earth     = 399
+   Mars      = 499
+   Jupiter   = 599
+   Saturn    = 699
+   Uranus    = 799
+   Neptune   = 899
 */
 
-const TEXTURES = {
-
-    earth:
-        "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
-
-    earthNormal:
-        "https://threejs.org/examples/textures/planets/earth_normal_2048.jpg",
-
-    earthSpecular:
-        "https://threejs.org/examples/textures/planets/earth_specular_2048.jpg",
-
-    moon:
-        "https://threejs.org/examples/textures/planets/moon_1024.jpg",
-
-    mars:
-        "https://threejs.org/examples/textures/planets/mars_1k_color.jpg",
-
-    mercury:
-        "https://threejs.org/examples/textures/planets/mercury.jpg",
-
-    venus:
-        "https://threejs.org/examples/textures/planets/venus.jpg"
-};
-
-
-/* =========================================================
-   PLANET DATA
-========================================================= */
-
-const planets = [
+const PLANETS = [
 
     {
         name: "Mercury",
+        id: "199",
         radius: 2.5,
-        distance: 32,
-        color: 0x8d8175,
-        speed: 0.020,
-        texture: TEXTURES.mercury,
-        description:
-            "The smallest planet and the closest planet to the Sun."
+        color: 0x8d8175
     },
 
     {
         name: "Venus",
+        id: "299",
         radius: 4,
-        distance: 50,
-        color: 0xd6a866,
-        speed: 0.015,
-        texture: TEXTURES.venus,
-        description:
-            "A hot terrestrial planet with a thick atmosphere."
+        color: 0xd6a866
     },
 
     {
         name: "Earth",
+        id: "399",
         radius: 4.3,
-        distance: 70,
-        color: 0x2778d8,
-        speed: 0.010,
-        texture: TEXTURES.earth,
-        description:
-            "Our home planet with liquid surface water and a life-supporting atmosphere."
+        color: 0x2878d8
     },
 
     {
         name: "Mars",
+        id: "499",
         radius: 3.2,
-        distance: 90,
-        color: 0xb94c32,
-        speed: 0.008,
-        texture: TEXTURES.mars,
-        description:
-            "The red planet with a thin carbon-dioxide atmosphere."
+        color: 0xb94c32
     },
 
     {
         name: "Jupiter",
+        id: "599",
         radius: 10,
-        distance: 125,
-        color: 0xc89a6d,
-        speed: 0.004,
-        description:
-            "The largest planet in the Solar System."
+        color: 0xc89a6d
     },
 
     {
         name: "Saturn",
+        id: "699",
         radius: 8.5,
-        distance: 165,
-        color: 0xd6bd87,
-        speed: 0.003,
-        description:
-            "A gas giant surrounded by a spectacular ring system."
+        color: 0xd6bd87
     },
 
     {
         name: "Uranus",
+        id: "799",
         radius: 6.5,
-        distance: 205,
-        color: 0x72d5df,
-        speed: 0.002,
-        description:
-            "An ice giant rotating with an extreme axial tilt."
+        color: 0x72d5df
     },
 
     {
         name: "Neptune",
+        id: "899",
         radius: 6.2,
-        distance: 245,
-        color: 0x365fd5,
-        speed: 0.0015,
-        description:
-            "A distant ice giant with extremely fast winds."
+        color: 0x365fd5
     }
 
 ];
 
 
 /* =========================================================
-   PLANET STORAGE
+   JPL API
+========================================================= */
+
+const JPL_API =
+    "https://ssd.jpl.nasa.gov/api/horizons.api";
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function getJPLDate() {
+
+    const now =
+        new Date();
+
+    return now.toISOString()
+        .replace("T", " ")
+        .replace("Z", "");
+
+}
+
+
+/* =========================================================
+   GET REAL PLANET POSITION
+========================================================= */
+
+async function getPlanetPosition(
+    planet
+) {
+
+    const date =
+        getJPLDate();
+
+
+    const params =
+        new URLSearchParams({
+
+            format: "json",
+
+            COMMAND:
+                `'${planet.id}'`,
+
+            OBJ_DATA:
+                "NO",
+
+            MAKE_EPHEM:
+                "YES",
+
+            EPHEM_TYPE:
+                "VECTORS",
+
+            CENTER:
+                "'500@10'",
+
+            TLIST:
+                `'${date}'`,
+
+            TLIST_TYPE:
+                "CAL",
+
+            REF_PLANE:
+                "ECLIPTIC",
+
+            REF_SYSTEM:
+                "ICRF",
+
+            OUT_UNITS:
+                "AU-D",
+
+            VEC_TABLE:
+                "1",
+
+            VEC_LABELS:
+                "YES",
+
+            CSV_FORMAT:
+                "NO"
+
+        });
+
+
+    const url =
+        JPL_API +
+        "?" +
+        params.toString();
+
+
+    const response =
+        await fetch(
+            url
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "JPL request failed"
+        );
+
+    }
+
+
+    const data =
+        await response.json();
+
+
+    if (
+        !data.result
+    ) {
+
+        throw new Error(
+            "JPL returned no result"
+        );
+
+    }
+
+
+    return parseJPLVector(
+        data.result
+    );
+}
+
+
+/* =========================================================
+   PARSE JPL VECTOR
+========================================================= */
+
+function parseJPLVector(
+    result
+) {
+
+    const start =
+        result.indexOf(
+            "$$SOE"
+        );
+
+    const end =
+        result.indexOf(
+            "$$EOE"
+        );
+
+
+    if (
+        start === -1 ||
+        end === -1
+    ) {
+
+        throw new Error(
+            "JPL vector data not found"
+        );
+
+    }
+
+
+    const block =
+        result.substring(
+            start + 5,
+            end
+        ).trim();
+
+
+    const lines =
+        block.split(
+            "\n"
+        );
+
+
+    const numbers = [];
+
+
+    for (
+        const line of lines
+    ) {
+
+        const matches =
+            line.match(
+                /[-+]?\d+(?:\.\d+)?(?:[Ee][-+]?\d+)?/g
+            );
+
+        if (
+            matches
+        ) {
+
+            matches.forEach(
+                value => {
+
+                    numbers.push(
+                        Number(value)
+                    );
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /*
+       First values contain the
+       requested epoch and XYZ data.
+
+       We search for the last 3
+       values in the first vector
+       record when necessary.
+    */
+
+    if (
+        numbers.length < 3
+    ) {
+
+        throw new Error(
+            "Invalid JPL vector"
+        );
+
+    }
+
+
+    /*
+       Horizons VEC_TABLE=1 returns
+       X, Y, Z position components.
+    */
+
+    const x =
+        numbers[numbers.length - 3];
+
+    const y =
+        numbers[numbers.length - 2];
+
+    const z =
+        numbers[numbers.length - 1];
+
+
+    return {
+        x,
+        y,
+        z
+    };
+
+}
+
+
+/* =========================================================
+   SCALE
+========================================================= */
+
+/*
+   1 AU is approximately represented
+   by 70 visual units.
+
+   Planet sizes are deliberately
+   enlarged so they remain visible.
+*/
+
+const AU_SCALE = 70;
+
+
+/* =========================================================
+   PLANET OBJECTS
 ========================================================= */
 
 const planetObjects = [];
 
 
 /* =========================================================
-   ORBIT CREATOR
-========================================================= */
-
-function createOrbit(distance) {
-
-    const points = [];
-
-    const segments = 180;
-
-    for (
-        let i = 0;
-        i <= segments;
-        i++
-    ) {
-
-        const angle =
-            i /
-            segments *
-            Math.PI *
-            2;
-
-        points.push(
-            new THREE.Vector3(
-                Math.cos(angle) *
-                    distance,
-
-                0,
-
-                Math.sin(angle) *
-                    distance
-            )
-        );
-    }
-
-    const geometry =
-        new THREE.BufferGeometry()
-            .setFromPoints(
-                points
-            );
-
-    const material =
-        new THREE.LineBasicMaterial({
-            color: 0x35566c,
-            transparent: true,
-            opacity: 0.32
-        });
-
-    const orbit =
-        new THREE.LineLoop(
-            geometry,
-            material
-        );
-
-    scene.add(orbit);
-
-    return orbit;
-}
-
-
-/* =========================================================
-   EARTH ATMOSPHERE
-========================================================= */
-
-function createEarthAtmosphere(
-    earth
-) {
-
-    const atmosphereGeometry =
-        new THREE.SphereGeometry(
-            4.55,
-            64,
-            64
-        );
-
-    const atmosphereMaterial =
-        new THREE.MeshBasicMaterial({
-            color: 0x2496ff,
-            transparent: true,
-            opacity: 0.13,
-            side: THREE.BackSide
-        });
-
-    const atmosphere =
-        new THREE.Mesh(
-            atmosphereGeometry,
-            atmosphereMaterial
-        );
-
-    earth.add(
-        atmosphere
-    );
-}
-
-
-/* =========================================================
-   MOON
-========================================================= */
-
-function createMoon(
-    earth
-) {
-
-    const moonGeometry =
-        new THREE.SphereGeometry(
-            1.15,
-            40,
-            40
-        );
-
-    const moonTexture =
-        textureLoader.load(
-            TEXTURES.moon
-        );
-
-    const moonMaterial =
-        new THREE.MeshStandardMaterial({
-
-            map: moonTexture,
-
-            color: 0xffffff,
-
-            roughness: 1
-
-        });
-
-    const moon =
-        new THREE.Mesh(
-            moonGeometry,
-            moonMaterial
-        );
-
-    moon.position.set(
-        9,
-        0,
-        0
-    );
-
-    earth.add(
-        moon
-    );
-
-
-    /* MOON ORBIT */
-
-    const moonOrbitPoints = [];
-
-    for (
-        let i = 0;
-        i <= 100;
-        i++
-    ) {
-
-        const angle =
-            i /
-            100 *
-            Math.PI *
-            2;
-
-        moonOrbitPoints.push(
-            new THREE.Vector3(
-                Math.cos(angle) * 9,
-                0,
-                Math.sin(angle) * 9
-            )
-        );
-    }
-
-    const moonOrbitGeometry =
-        new THREE.BufferGeometry()
-            .setFromPoints(
-                moonOrbitPoints
-            );
-
-    const moonOrbitMaterial =
-        new THREE.LineBasicMaterial({
-            color: 0x6b8191,
-            transparent: true,
-            opacity: 0.22
-        });
-
-    const moonOrbit =
-        new THREE.LineLoop(
-            moonOrbitGeometry,
-            moonOrbitMaterial
-        );
-
-    earth.add(
-        moonOrbit
-    );
-
-
-    return {
-
-        moon: moon,
-
-        orbit: moonOrbit,
-
-        angle: 0
-
-    };
-}
-
-
-/* =========================================================
    CREATE PLANET
 ========================================================= */
 
-function createPlanet(data) {
+function createPlanet(
+    data
+) {
 
     const geometry =
         new THREE.SphereGeometry(
@@ -575,102 +605,18 @@ function createPlanet(data) {
             64
         );
 
-
-    let material;
-
-
-    /*
-       Earth gets detailed material
-    */
-
-    if (
-        data.name === "Earth"
-    ) {
-
-        const earthTexture =
-            textureLoader.load(
-                TEXTURES.earth
-            );
-
-        const normalTexture =
-            textureLoader.load(
-                TEXTURES.earthNormal
-            );
-
-        const specularTexture =
-            textureLoader.load(
-                TEXTURES.earthSpecular
-            );
-
-        material =
-            new THREE.MeshPhongMaterial({
-
-                map:
-                    earthTexture,
-
-                normalMap:
-                    normalTexture,
-
-                specularMap:
-                    specularTexture,
-
-                specular:
-                    new THREE.Color(
-                        0x333333
-                    ),
-
-                shininess: 15
-
-            });
-
-    }
-
-    else if (
-        data.texture
-    ) {
-
-        const texture =
-            textureLoader.load(
-                data.texture
-            );
-
-        material =
-            new THREE.MeshStandardMaterial({
-
-                map: texture,
-
-                roughness: 0.9,
-
-                metalness: 0
-
-            });
-
-    }
-
-    else {
-
-        material =
-            new THREE.MeshStandardMaterial({
-
-                color:
-                    data.color,
-
-                roughness:
-                    0.85
-
-            });
-
-    }
-
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: data.color,
+            roughness: 0.85,
+            metalness: 0
+        });
 
     const mesh =
         new THREE.Mesh(
             geometry,
             material
         );
-
-    mesh.position.x =
-        data.distance;
 
     mesh.userData =
         data;
@@ -680,48 +626,9 @@ function createPlanet(data) {
     );
 
 
-    const orbit =
-        createOrbit(
-            data.distance
-        );
-
-
-    const object = {
-
-        mesh: mesh,
-
-        data: data,
-
-        orbit: orbit,
-
-        angle:
-            Math.random() *
-            Math.PI *
-            2,
-
-        moon: null
-
-    };
-
-
-    /* EARTH */
-
-    if (
-        data.name === "Earth"
-    ) {
-
-        createEarthAtmosphere(
-            mesh
-        );
-
-        object.moon =
-            createMoon(
-                mesh
-            );
-    }
-
-
-    /* SATURN */
+    /*
+       Saturn rings
+    */
 
     if (
         data.name === "Saturn"
@@ -737,8 +644,7 @@ function createPlanet(data) {
         const ringMaterial =
             new THREE.MeshBasicMaterial({
 
-                color:
-                    0xc1ad82,
+                color: 0xc4ae82,
 
                 side:
                     THREE.DoubleSide,
@@ -758,12 +664,27 @@ function createPlanet(data) {
             );
 
         rings.rotation.x =
-            Math.PI / 2.45;
+            Math.PI / 2.4;
 
         mesh.add(
             rings
         );
     }
+
+
+    const object = {
+
+        data,
+
+        mesh,
+
+        realPosition: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+
+    };
 
 
     planetObjects.push(
@@ -774,151 +695,143 @@ function createPlanet(data) {
 }
 
 
-/* =========================================================
-   CREATE PLANETS
-========================================================= */
-
-planets.forEach(
+PLANETS.forEach(
     createPlanet
 );
 
 
 /* =========================================================
-   LABEL SYSTEM
+   APPLY REAL POSITION
 ========================================================= */
 
-let labelsVisible = false;
-
-const labels = [];
-
-
-function createLabel(
-    text,
+function applyRealPosition(
+    object,
     position
 ) {
 
-    const canvas =
-        document.createElement(
-            "canvas"
-        );
+    object.realPosition =
+        position;
 
-    canvas.width = 512;
-    canvas.height = 128;
 
-    const ctx =
-        canvas.getContext(
-            "2d"
-        );
+    /*
+       Horizons returns AU.
 
-    ctx.clearRect(
-        0,
-        0,
-        512,
-        128
+       Three.js scene uses a
+       visualization scale.
+    */
+
+    object.mesh.position.set(
+
+        position.x *
+            AU_SCALE,
+
+        position.z *
+            AU_SCALE,
+
+        -position.y *
+            AU_SCALE
+
     );
 
-    ctx.fillStyle =
-        "#ffffff";
-
-    ctx.font =
-        "bold 42px Arial";
-
-    ctx.textAlign =
-        "center";
-
-    ctx.fillText(
-        text,
-        256,
-        76
-    );
-
-    const texture =
-        new THREE.CanvasTexture(
-            canvas
-        );
-
-    const material =
-        new THREE.SpriteMaterial({
-            map: texture,
-            transparent: true
-        });
-
-    const sprite =
-        new THREE.Sprite(
-            material
-        );
-
-    sprite.scale.set(
-        24,
-        6,
-        1
-    );
-
-    sprite.position.copy(
-        position
-    );
-
-    sprite.visible =
-        labelsVisible;
-
-    scene.add(
-        sprite
-    );
-
-    labels.push(
-        sprite
-    );
-
-    return sprite;
 }
 
 
-planetObjects.forEach(
-    planet => {
-
-        planet.label =
-            createLabel(
-                planet.data.name,
-                planet.mesh.position
-            );
-
-    }
-);
-
-
 /* =========================================================
-   PLANET INFORMATION
+   LOAD ALL PLANETS
 ========================================================= */
 
-function showPlanetInfo(
-    data
-) {
+async function loadRealSolarSystem() {
 
-    infoPanel.innerHTML = `
+    if (loading) {
 
-        <div class="info-title">
-            ${data.name.toUpperCase()}
-        </div>
+        loading.style.display =
+            "block";
 
-        <div class="info-line">
-            ${data.description}
-        </div>
+    }
 
-        <div class="info-line">
-            Visual Orbit:
-            ${data.distance}
-        </div>
 
-        <div class="info-line">
-            REALISTIC 3D MODEL
-        </div>
+    let successful = 0;
 
-    `;
+
+    for (
+        const object of planetObjects
+    ) {
+
+        try {
+
+            const position =
+                await getPlanetPosition(
+                    object.data
+                );
+
+
+            applyRealPosition(
+                object,
+                position
+            );
+
+
+            successful++;
+
+
+        }
+        catch (error) {
+
+            console.error(
+                object.data.name,
+                error
+            );
+
+        }
+
+    }
+
+
+    if (loading) {
+
+        loading.style.opacity =
+            "0";
+
+        setTimeout(
+            () => {
+
+                loading.style.display =
+                    "none";
+
+            },
+            500
+        );
+
+    }
+
+
+    if (
+        infoPanel
+    ) {
+
+        infoPanel.innerHTML = `
+
+            <div class="info-title">
+                SOLAR SYSTEM ONLINE
+            </div>
+
+            <div class="info-text">
+                JPL Horizons data loaded
+            </div>
+
+            <div class="info-text">
+                ${successful}/8 planets synchronized
+            </div>
+
+        `;
+
+    }
+
 }
 
 
 /* =========================================================
-   RAYCASTING
+   CLICK PLANET
 ========================================================= */
 
 const raycaster =
@@ -930,7 +843,7 @@ const mouse =
 
 renderer.domElement.addEventListener(
     "pointerdown",
-    function (event) {
+    function(event) {
 
         mouse.x =
             event.clientX /
@@ -941,6 +854,7 @@ renderer.domElement.addEventListener(
             -(event.clientY /
                 window.innerHeight) *
             2 + 1;
+
 
         raycaster.setFromCamera(
             mouse,
@@ -984,29 +898,180 @@ renderer.domElement.addEventListener(
 
 
         if (
-            selected &&
-            selected.userData.name
+            !selected
         ) {
-
-            showPlanetInfo(
-                selected.userData
-            );
-
-            controls.target.copy(
-                selected.position
-            );
-
+            return;
         }
+
+
+        const data =
+            selected.userData;
+
+
+        const object =
+            planetObjects.find(
+                p =>
+                    p.data.name ===
+                    data.name
+            );
+
+
+        if (
+            !object
+        ) {
+            return;
+        }
+
+
+        infoPanel.innerHTML = `
+
+            <div class="info-title">
+                ${data.name.toUpperCase()}
+            </div>
+
+            <div class="info-text">
+                JPL ID: ${data.id}
+            </div>
+
+            <div class="info-text">
+                X: ${object.realPosition.x.toFixed(6)} AU
+            </div>
+
+            <div class="info-text">
+                Y: ${object.realPosition.y.toFixed(6)} AU
+            </div>
+
+            <div class="info-text">
+                Z: ${object.realPosition.z.toFixed(6)} AU
+            </div>
+
+            <div class="info-text">
+                POSITION: JPL HORIZONS
+            </div>
+
+        `;
+
+
+        controls.target.copy(
+            selected.position
+        );
 
     }
 );
 
 
 /* =========================================================
-   ORBITS BUTTON
+   ORBIT VISUALIZATION
 ========================================================= */
 
-let orbitsVisible = true;
+let orbitVisible =
+    true;
+
+const orbitLines = [];
+
+
+function createOrbitLine(
+    object
+) {
+
+    const points = [];
+
+    const radius =
+        Math.sqrt(
+            object.mesh.position.x *
+            object.mesh.position.x +
+
+            object.mesh.position.z *
+            object.mesh.position.z
+        );
+
+
+    const segments =
+        180;
+
+
+    for (
+        let i = 0;
+        i <= segments;
+        i++
+    ) {
+
+        const angle =
+            i /
+            segments *
+            Math.PI *
+            2;
+
+
+        points.push(
+            new THREE.Vector3(
+
+                Math.cos(angle) *
+                    radius,
+
+                0,
+
+                Math.sin(angle) *
+                    radius
+
+            )
+        );
+
+    }
+
+
+    const geometry =
+        new THREE.BufferGeometry()
+            .setFromPoints(
+                points
+            );
+
+
+    const material =
+        new THREE.LineBasicMaterial({
+            color: 0x31566d,
+            transparent: true,
+            opacity: 0.3
+        });
+
+
+    const line =
+        new THREE.LineLoop(
+            geometry,
+            material
+        );
+
+
+    scene.add(
+        line
+    );
+
+
+    orbitLines.push(
+        line
+    );
+
+}
+
+
+function rebuildOrbits() {
+
+    orbitLines.forEach(
+        line =>
+            scene.remove(line)
+    );
+
+
+    orbitLines.length =
+        0;
+
+
+    planetObjects.forEach(
+        createOrbitLine
+    );
+
+}
+
 
 document
     .getElementById(
@@ -1014,22 +1079,24 @@ document
     )
     .addEventListener(
         "click",
-        function () {
+        function() {
 
-            orbitsVisible =
-                !orbitsVisible;
+            orbitVisible =
+                !orbitVisible;
 
-            planetObjects.forEach(
-                planet => {
 
-                    planet.orbit.visible =
-                        orbitsVisible;
+            orbitLines.forEach(
+                line => {
+
+                    line.visible =
+                        orbitVisible;
 
                 }
             );
 
+
             this.textContent =
-                orbitsVisible
+                orbitVisible
                     ? "ORBITS"
                     : "ORBIT OFF";
 
@@ -1038,8 +1105,109 @@ document
 
 
 /* =========================================================
-   LABEL BUTTON
+   LABELS
 ========================================================= */
+
+let labelsVisible =
+    false;
+
+const labels = [];
+
+
+function makeLabel(
+    name
+) {
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+    canvas.width =
+        512;
+
+    canvas.height =
+        128;
+
+
+    const ctx =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    ctx.font =
+        "bold 42px Arial";
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.fillText(
+        name,
+        256,
+        75
+    );
+
+
+    const texture =
+        new THREE.CanvasTexture(
+            canvas
+        );
+
+
+    const material =
+        new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true
+        });
+
+
+    const sprite =
+        new THREE.Sprite(
+            material
+        );
+
+
+    sprite.scale.set(
+        25,
+        6,
+        1
+    );
+
+
+    sprite.visible =
+        false;
+
+
+    scene.add(
+        sprite
+    );
+
+
+    labels.push(
+        sprite
+    );
+
+
+    return sprite;
+}
+
+
+planetObjects.forEach(
+    object => {
+
+        object.label =
+            makeLabel(
+                object.data.name
+            );
+
+    }
+);
+
 
 document
     .getElementById(
@@ -1047,10 +1215,11 @@ document
     )
     .addEventListener(
         "click",
-        function () {
+        function() {
 
             labelsVisible =
                 !labelsVisible;
+
 
             labels.forEach(
                 label => {
@@ -1060,6 +1229,7 @@ document
 
                 }
             );
+
 
             this.textContent =
                 labelsVisible
@@ -1071,16 +1241,16 @@ document
 
 
 /* =========================================================
-   RESET CAMERA
+   RESET
 ========================================================= */
 
 document
     .getElementById(
-        "resetCamera"
+        "resetView"
     )
     .addEventListener(
         "click",
-        function () {
+        function() {
 
             camera.position.set(
                 0,
@@ -1101,12 +1271,34 @@ document
 
 
 /* =========================================================
-   ANIMATION
+   REAL TIME REFRESH
 ========================================================= */
 
-const clock =
-    new THREE.Clock();
+document
+    .getElementById(
+        "realTime"
+    )
+    .addEventListener(
+        "click",
+        async function() {
 
+            this.textContent =
+                "SYNCING...";
+
+            await loadRealSolarSystem();
+
+            rebuildOrbits();
+
+            this.textContent =
+                "REAL TIME";
+
+        }
+    );
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
 
 function animate() {
 
@@ -1114,100 +1306,35 @@ function animate() {
         animate
     );
 
-    const delta =
-        clock.getDelta();
-
-
-    /* SUN */
 
     sun.rotation.y +=
-        delta * 0.12;
+        0.002;
 
     sunGlow.rotation.y -=
-        delta * 0.04;
+        0.001;
 
-
-    /* STARS */
 
     stars.rotation.y +=
-        delta * 0.0015;
+        0.0002;
 
-
-    /* PLANETS */
 
     planetObjects.forEach(
-        planet => {
+        object => {
 
-            planet.angle +=
-                planet.data.speed;
+            object.mesh.rotation.y +=
+                0.003;
 
-
-            const angle =
-                planet.angle;
-
-
-            const distance =
-                planet.data.distance;
-
-
-            planet.mesh.position.x =
-                Math.cos(angle) *
-                distance;
-
-
-            planet.mesh.position.z =
-                Math.sin(angle) *
-                distance;
-
-
-            planet.mesh.rotation.y +=
-                delta * 0.3;
-
-
-            /* LABEL */
 
             if (
-                planet.label
+                object.label
             ) {
 
-                planet.label.position.copy(
-                    planet.mesh.position
+                object.label.position.copy(
+                    object.mesh.position
                 );
 
-                planet.label.position.y +=
-                    planet.data.radius + 5;
-
-            }
-
-
-            /* MOON */
-
-            if (
-                planet.moon
-            ) {
-
-                planet.moon.angle +=
-                    delta * 0.7;
-
-
-                const moonAngle =
-                    planet.moon.angle;
-
-
-                planet.moon.moon.position.x =
-                    Math.cos(
-                        moonAngle
-                    ) * 9;
-
-
-                planet.moon.moon.position.z =
-                    Math.sin(
-                        moonAngle
-                    ) * 9;
-
-
-                planet.moon.moon.rotation.y +=
-                    delta * 0.2;
+                object.label.position.y +=
+                    object.data.radius + 5;
 
             }
 
@@ -1232,13 +1359,15 @@ function animate() {
 
 window.addEventListener(
     "resize",
-    function () {
+    function() {
 
         camera.aspect =
             window.innerWidth /
             window.innerHeight;
 
+
         camera.updateProjectionMatrix();
+
 
         renderer.setSize(
             window.innerWidth,
@@ -1254,3 +1383,11 @@ window.addEventListener(
 ========================================================= */
 
 animate();
+
+
+loadRealSolarSystem()
+    .then(() => {
+
+        rebuildOrbits();
+
+    });
